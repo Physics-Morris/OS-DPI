@@ -5,6 +5,9 @@ body {
   opacity: 0;
   width: 100vw;
   height: 100vh;
+  /* dvh = iOS Safari's visible viewport (vh there is the taller toolbar-hidden
+   * size, which pushed the bottom row under the chrome). vh is the fallback. */
+  height: 100dvh;
   touch-action: none;
 }
 
