@@ -20,6 +20,7 @@ import { Designer } from "components/designer";
 import { Content } from "components/content";
 import { workerCheckForUpdate } from "components/serviceWorker";
 import { accessed } from "./eval";
+import { installIOSMediaUnlock } from "./iosMediaUnlock";
 
 /** let me wait for the page to load */
 const pageLoaded = new Promise((resolve) => {
@@ -189,5 +190,9 @@ window.addEventListener("resize", () => {
   if (!Globals.state) return;
   Globals.state.update();
 });
+
+// iOS Safari blocks speech/audio that isn't triggered from a user gesture;
+// prime both on the first interaction so deferred-render playback works.
+installIOSMediaUnlock();
 
 start();
