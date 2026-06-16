@@ -21,6 +21,7 @@ import { Content } from "components/content";
 import { workerCheckForUpdate } from "components/serviceWorker";
 import { accessed } from "./eval";
 import { installIOSMediaUnlock } from "./iosMediaUnlock";
+import { installFullscreenExit } from "./fullscreenExit";
 
 /** let me wait for the page to load */
 const pageLoaded = new Promise((resolve) => {
@@ -194,5 +195,8 @@ window.addEventListener("resize", () => {
 // iOS Safari blocks speech/audio that isn't triggered from a user gesture;
 // prime both on the first interaction so deferred-render playback works.
 installIOSMediaUnlock();
+
+// Floating control: tap for full screen, hold three seconds to reopen the editor.
+installFullscreenExit();
 
 start();
