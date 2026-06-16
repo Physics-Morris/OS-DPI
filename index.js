@@ -18235,7 +18235,7 @@ function takeUntil(notifier) {
     });
 }
 
-function tap(observerOrNext, error, complete) {
+function tap$1(observerOrNext, error, complete) {
     var tapObserver = isFunction(observerOrNext) || error || complete
         ?
             { next: observerOrNext, error: error, complete: complete }
@@ -19956,7 +19956,7 @@ class KeyHandler extends Handler {
         // ignore events from the designer
         filter((e) => notDesigner(e)),
         // prevent default actions
-        tap((e) => e.preventDefault()),
+        tap$1((e) => e.preventDefault()),
         // remove any repeats
         filter((e) => !e.repeat),
       )
@@ -20090,7 +20090,7 @@ class PointerHandler extends Handler {
       return /** @type {RxJs.Observable<PointerEvent>} */ (
         fromEvent(document, event).pipe(
           // fudge the target to be the button and not any contained thing
-          tap((/** @type {PointerEvent} */ e) => {
+          tap$1((/** @type {PointerEvent} */ e) => {
             if (
               !(e.target instanceof HTMLButtonElement) &&
               e.target instanceof HTMLElement
@@ -20107,7 +20107,7 @@ class PointerHandler extends Handler {
 
     const pointerDown$ = fromPointerEvent("pointerdown").pipe(
       // disable pointer capture
-      tap(
+      tap$1(
         (x) =>
           x.target instanceof Element &&
           x.target.hasPointerCapture(x.pointerId) &&
@@ -20234,7 +20234,7 @@ class PointerHandler extends Handler {
           !e.target.disabled,
       ),
       // kill contextmenu events
-      tap((e) => e.type === "contextmenu" && e.preventDefault()),
+      tap$1((e) => e.type === "contextmenu" && e.preventDefault()),
 
       // Add the timer events
       mergeWith(
@@ -23548,6 +23548,142 @@ function installIOSMediaUnlock() {
   }
 }
 
+/** Floating button: tap for full screen, hold 3s (or press Esc) to return to
+ * the editor. The hold stops a stray tap from dropping a communicator out of
+ * their board. Lives on <body>, clear of the uhtml render that rewrites #UI. */
+
+const HOLD_MS = 3000;
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+const RING = `<svg xmlns="${SVG_NS}" class="fsx-ring" viewBox="0 0 48 48" aria-hidden="true">
+  <circle class="fsx-ring-track" cx="24" cy="24" r="21" pathLength="100" />
+  <circle class="fsx-ring-progress" cx="24" cy="24" r="21" pathLength="100" />
+</svg>`;
+const EXPAND_ICON = `<svg xmlns="${SVG_NS}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M8 3H5a2 2 0 0 0-2 2v3" /><path d="M21 8V5a2 2 0 0 0-2-2h-3" />
+  <path d="M3 16v3a2 2 0 0 0 2 2h3" /><path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+</svg>`;
+const COMPRESS_ICON = `<svg xmlns="${SVG_NS}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M8 3v3a2 2 0 0 1-2 2H3" /><path d="M21 8h-3a2 2 0 0 1-2-2V3" />
+  <path d="M3 16h3a2 2 0 0 1 2 2v3" /><path d="M16 21v-3a2 2 0 0 1 2-2h3" />
+</svg>`;
+
+// Parse a trusted static SVG string into a node (keeps us off innerHTML).
+function svgFrom(markup) {
+  const doc = new DOMParser().parseFromString(markup, "image/svg+xml");
+  return document.importNode(doc.documentElement, true);
+}
+
+const inFullscreen = () => !!document.fullscreenElement;
+const inEditor = () => !!(Globals.state && Globals.state.get("editing"));
+
+async function requestFullscreen() {
+  // iOS may reject this; ignore, the hidden-designer view is the win there.
+  try {
+    await document.documentElement.requestFullscreen?.();
+  } catch {
+    /* ignore */
+  }
+}
+
+async function dropFullscreen() {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+  } catch {
+    /* ignore */
+  }
+}
+
+/** @param {boolean} on */
+function setEditing(on) {
+  if (Globals.state) Globals.state.update({ editing: on });
+}
+
+// Tap: enter full screen. In full screen a tap does nothing; leaving is the
+// hold or Esc, so a stray tap can't exit and there's no windowed in-between.
+function tap() {
+  if (inFullscreen()) return;
+  setEditing(false);
+  requestFullscreen();
+}
+
+// Hold complete: leave full screen first (awaited, so the editor paints into
+// the windowed layout without flashing), then open the editor.
+async function hold() {
+  await dropFullscreen();
+  setEditing(true);
+}
+
+function installFullscreenExit() {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "fsx-btn";
+  btn.setAttribute("aria-label", "Full screen. Hold to return to the editor.");
+  btn.title = "Tap for full screen • hold to edit";
+
+  const expand = document.createElement("span");
+  expand.className = "fsx-icon fsx-icon-expand";
+  expand.appendChild(svgFrom(EXPAND_ICON));
+  const compress = document.createElement("span");
+  compress.className = "fsx-icon fsx-icon-compress";
+  compress.appendChild(svgFrom(COMPRESS_ICON));
+  btn.append(svgFrom(RING), expand, compress);
+
+  /** @type {ReturnType<typeof setTimeout> | null} */
+  let timer = null;
+  let fired = false; // hold fired, so the matching pointerup shouldn't tap
+
+  function stopHold() {
+    if (timer != null) clearTimeout(timer);
+    timer = null;
+    btn.classList.remove("fsx-holding");
+  }
+
+  btn.addEventListener("pointerdown", (event) => {
+    if (event.button > 0) return;
+    fired = false;
+    if (inEditor()) return; // editor: plain tap to full screen, no hold/ring
+    btn.classList.add("fsx-holding");
+    try {
+      btn.setPointerCapture(event.pointerId);
+    } catch {
+      /* ignore */
+    }
+    timer = setTimeout(() => {
+      fired = true;
+      stopHold();
+      hold();
+    }, HOLD_MS);
+  });
+
+  btn.addEventListener("pointerup", () => {
+    const wasHold = fired;
+    stopHold();
+    if (!wasHold) tap();
+  });
+
+  btn.addEventListener("pointercancel", stopHold);
+
+  btn.addEventListener("keydown", (event) => {
+    if (event.repeat) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      tap();
+    }
+  });
+
+  // Any full-screen exit (Esc, the OS, the completed hold) opens the editor.
+  btn.classList.toggle("fsx-active", inFullscreen());
+  document.addEventListener("fullscreenchange", () => {
+    btn.classList.toggle("fsx-active", inFullscreen());
+    if (!inFullscreen()) setEditing(true);
+  });
+
+  document.body.appendChild(btn);
+}
+
 /** let me wait for the page to load */
 const pageLoaded = new Promise((resolve) => {
   window.addEventListener("load", () => {
@@ -23720,6 +23856,9 @@ window.addEventListener("resize", () => {
 // iOS Safari blocks speech/audio that isn't triggered from a user gesture;
 // prime both on the first interaction so deferred-render playback works.
 installIOSMediaUnlock();
+
+// Floating control: tap for full screen, hold three seconds to reopen the editor.
+installFullscreenExit();
 
 start();
 //# sourceMappingURL=index.js.map
