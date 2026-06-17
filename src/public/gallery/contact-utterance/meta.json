@@ -1,0 +1,11 @@
+{
+  "title": "Contact-like system",
+  "description": "A contact-style board that adapts to location, formality, and tense.",
+  "tags": [
+    "utterance",
+    "contacts"
+  ],
+  "author": "UNC Project Open AAC",
+  "createdAt": "2026-06-16",
+  "official": true
+}
