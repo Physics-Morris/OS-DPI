@@ -1958,6 +1958,15 @@ body.designing .fsx-btn {
   display: inline-flex;
 }
 
+/* iOS has no real full screen (see fullscreenExit.js): the board-only view is
+ * the editor hidden, i.e. body without .designing, so swap the icon on that. */
+body.fsx-ios:not(.designing) .fsx-icon-expand {
+  display: none;
+}
+body.fsx-ios:not(.designing) .fsx-icon-compress {
+  display: inline-flex;
+}
+
 /* progress ring that fills while held (pathLength=100 keeps the dash maths 0..100) */
 .fsx-ring {
   position: absolute;

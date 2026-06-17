@@ -23762,11 +23762,24 @@ function svgFrom(markup) {
   return document.importNode(doc.documentElement, true);
 }
 
+// iPadOS/iOS Safari now supports the Fullscreen API, but entering it hands the
+// page to the OS full-screen chrome (the "swipe down to exit" banner and native
+// buttons). That chrome sits over our button near the safe-area inset so the
+// hold can't fire, and its one-tap exit defeats the whole point of the hold:
+// stopping a stray tap from dropping a communicator out of their board. So on
+// iOS we don't use the native API at all; hiding the editor IS the full-screen
+// view, and the button keeps working. (An earlier comment assumed iOS would
+// reject the request, but modern iPadOS does not.)
+const isIOS =
+  typeof navigator !== "undefined" &&
+  (/iP(ad|hone|od)/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+
 const inFullscreen = () => !!document.fullscreenElement;
 const inEditor = () => !!(Globals.state && Globals.state.get("editing"));
 
 async function requestFullscreen() {
-  // iOS may reject this; ignore, the hidden-designer view is the win there.
+  if (isIOS) return; // hidden-editor view is the full-screen experience here
   try {
     await document.documentElement.requestFullscreen?.();
   } catch {
@@ -23861,7 +23874,10 @@ function installFullscreenExit() {
   });
 
   // Any full-screen exit (Esc, the OS, the completed hold) opens the editor.
+  // On iOS there's no real full screen, so the icon tracks the editor state via
+  // CSS (body.fsx-ios:not(.designing)) instead of the fullscreenchange event.
   btn.classList.toggle("fsx-active", inFullscreen());
+  if (isIOS) document.body.classList.add("fsx-ios");
   document.addEventListener("fullscreenchange", () => {
     btn.classList.toggle("fsx-active", inFullscreen());
     if (!inFullscreen()) setEditing(true);
