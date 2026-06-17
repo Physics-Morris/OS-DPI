@@ -1,0 +1,11 @@
+{
+  "title": "Single words",
+  "description": "A 36-button core word board in a 6x6 grid with a message window.",
+  "tags": [
+    "grid",
+    "core"
+  ],
+  "author": "UNC Project Open AAC",
+  "createdAt": "2026-06-16",
+  "official": true
+}

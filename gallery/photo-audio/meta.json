@@ -1,0 +1,11 @@
+{
+  "title": "Photo audio",
+  "description": "A grid of photos that speak when selected.",
+  "tags": [
+    "photo",
+    "audio"
+  ],
+  "author": "UNC Project Open AAC",
+  "createdAt": "2026-06-16",
+  "official": true
+}
