@@ -22,6 +22,7 @@ import { workerCheckForUpdate } from "components/serviceWorker";
 import { accessed } from "./eval";
 import { installIOSMediaUnlock } from "./iosMediaUnlock";
 import { installFullscreenExit } from "./fullscreenExit";
+import { showGallery } from "./components/gallery";
 
 /** let me wait for the page to load */
 const pageLoaded = new Promise((resolve) => {
@@ -51,11 +52,16 @@ export async function start() {
       );
     }
   }
-  let name = window.location.hash.slice(1);
-  if (!name) {
-    name = await db.uniqueName("new");
-    window.location.hash = `#${name}`;
+  // Bare URL or #gallery shows the example gallery.
+  const hash = window.location.hash.slice(1);
+  if (!hash || hash === "gallery") {
+    if (Globals.methods) Globals.methods.stop();
+    await pageLoaded;
+    await showGallery();
+    return;
   }
+  document.body.classList.remove("gallery-mode");
+  const name = hash;
   db.setDesignName(name);
   const dataArray = await db.read("content", []);
   const noteArray = await db.read("notes", []);

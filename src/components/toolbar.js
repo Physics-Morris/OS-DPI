@@ -20,6 +20,7 @@ import { friendlyName, wikiName } from "./names";
 
 import { workerUpdateButton } from "components/serviceWorker";
 import { monkey } from "components/monkeyTest";
+import { ShareDialog } from "./shareDialog";
 
 /** Return a list of available Menu items on this component
  *
@@ -209,6 +210,11 @@ function getFileMenuItems(bar) {
       },
     }),
     new MenuItem({
+      label: "Share to Gallery",
+      title: "Contribute this board to the example gallery",
+      callback: () => bar.shareDialog.open(),
+    }),
+    new MenuItem({
       label: "New",
       callback: async () => {
         const name = await db.uniqueName("new");
@@ -219,6 +225,13 @@ function getFileMenuItems(bar) {
       label: "Open",
       callback: () => {
         bar.designListDialog.open();
+      },
+    }),
+    new MenuItem({
+      label: "Gallery",
+      title: "Browse the example gallery",
+      callback: () => {
+        window.open("#gallery", "_blank", `noopener=true`);
       },
     }),
     new MenuItem({
@@ -711,6 +724,7 @@ export class ToolBar extends TreeBase {
     this.helpMenu = new Menu("Help", getHelpMenuItems, this);
     this.designListDialog = new DesignListDialog();
     this.importURLDialog = new ImportURLDialog();
+    this.shareDialog = new ShareDialog();
   }
 
   template() {
@@ -760,6 +774,7 @@ export class ToolBar extends TreeBase {
           <li>${workerUpdateButton()}</li>
         </ul>
         ${this.designListDialog.template()} ${this.importURLDialog.template()}
+        ${this.shareDialog.template()}
       </div>
     `;
   }
