@@ -1,0 +1,11 @@
+{
+  "title": "Single words with morphs",
+  "description": "Core words with their morphological forms across category pages.",
+  "tags": [
+    "grid",
+    "morphology"
+  ],
+  "author": "UNC Project Open AAC",
+  "createdAt": "2026-06-16",
+  "official": true
+}
