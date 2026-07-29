@@ -26,7 +26,9 @@ class ShareDialog {
 
   /** @returns {HTMLDialogElement} */
   get dialog() {
-    return /** @type {HTMLDialogElement} */ (document.getElementById(DIALOG_ID));
+    return /** @type {HTMLDialogElement} */ (
+      document.getElementById(DIALOG_ID)
+    );
   }
 
   open() {
@@ -49,7 +51,11 @@ class ShareDialog {
         </label>
         <label
           >Description
-          <textarea name="description" rows="2" placeholder="What is this board for?"></textarea>
+          <textarea
+            name="description"
+            rows="2"
+            placeholder="What is this board for?"
+          ></textarea>
         </label>
         <label
           >Tags (comma separated)
@@ -63,7 +69,11 @@ class ShareDialog {
           <button type="submit" class="share-btn share-btn--primary">
             Prepare files &amp; open GitHub
           </button>
-          <button type="button" class="share-btn" @click=${() => dialog.close()}>
+          <button
+            type="button"
+            class="share-btn"
+            @click=${() => dialog.close()}
+          >
             Cancel
           </button>
         </div>
@@ -118,10 +128,15 @@ class ShareDialog {
             On the GitHub page, drag in <code>board.osdpi</code> and
             <code>meta.json</code>.
           </li>
-          <li>Click <strong>Commit changes</strong> / <strong>Propose changes</strong>.</li>
+          <li>
+            Click <strong>Commit changes</strong> /
+            <strong>Propose changes</strong>.
+          </li>
           <li>Confirm to open your pull request.</li>
         </ol>
-        <p class="share-hint">If a download was blocked, copy <code>meta.json</code>:</p>
+        <p class="share-hint">
+          If a download was blocked, copy <code>meta.json</code>:
+        </p>
         <textarea class="share-meta" readonly rows="7">${metaText}</textarea>
         <div class="share-actions">
           <button

@@ -27,7 +27,13 @@ body.gallery-mode .fsx-btn {
   max-width: 1100px;
   margin: 0 auto;
   padding: clamp(1rem, 3vw, 2.5rem);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
     sans-serif;
 }
 
@@ -142,12 +148,24 @@ body.gallery-mode .fsx-btn {
 }
 
 /* Stagger the entrance of the first several cards. */
-.gallery-card:nth-child(1) { animation-delay: 0.02s; }
-.gallery-card:nth-child(2) { animation-delay: 0.06s; }
-.gallery-card:nth-child(3) { animation-delay: 0.1s; }
-.gallery-card:nth-child(4) { animation-delay: 0.14s; }
-.gallery-card:nth-child(5) { animation-delay: 0.18s; }
-.gallery-card:nth-child(6) { animation-delay: 0.22s; }
+.gallery-card:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.gallery-card:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.gallery-card:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.gallery-card:nth-child(4) {
+  animation-delay: 0.14s;
+}
+.gallery-card:nth-child(5) {
+  animation-delay: 0.18s;
+}
+.gallery-card:nth-child(6) {
+  animation-delay: 0.22s;
+}
 
 .gallery-card:hover {
   transform: translateY(-4px);

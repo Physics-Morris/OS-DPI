@@ -8,7 +8,12 @@
   width: calc(100vw - 2rem);
   background-color: var(--surface1);
   color: var(--text1);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
 }
 
 #ShareDialog.share-dialog::backdrop {

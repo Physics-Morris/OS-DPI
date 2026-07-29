@@ -50,15 +50,21 @@ function tagChip(t) {
 function card(item) {
   return html`<article class="gallery-card">
     <h2 class="gallery-card-title">${item.title}</h2>
-    ${item.description
-      ? html`<p class="gallery-card-desc">${item.description}</p>`
-      : null}
-    ${item.tags && item.tags.length
-      ? html`<div class="gallery-tags">${item.tags.map(tagChip)}</div>`
-      : null}
-    ${item.author
-      ? html`<p class="gallery-card-author">by ${item.author}</p>`
-      : null}
+    ${
+      item.description
+        ? html`<p class="gallery-card-desc">${item.description}</p>`
+        : null
+    }
+    ${
+      item.tags && item.tags.length
+        ? html`<div class="gallery-tags">${item.tags.map(tagChip)}</div>`
+        : null
+    }
+    ${
+      item.author
+        ? html`<p class="gallery-card-author">by ${item.author}</p>`
+        : null
+    }
     <div class="gallery-card-actions">
       <a
         class="gallery-btn gallery-btn--primary"
@@ -83,7 +89,11 @@ function card(item) {
 
 function contributeCard() {
   return html`<article class="gallery-card gallery-card--cta">
-    <a class="gallery-cta-main" href=${import.meta.env.BASE_URL} @click=${newDesign}>
+    <a
+      class="gallery-cta-main"
+      href=${import.meta.env.BASE_URL}
+      @click=${newDesign}
+    >
       <span class="gallery-cta-icon" aria-hidden="true">+</span>
       <span class="gallery-cta-title">Build &amp; share your own</span>
       <span class="gallery-cta-sub"
@@ -91,7 +101,12 @@ function contributeCard() {
         request</span
       >
     </a>
-    <a class="gallery-link" href=${CONTRIBUTE_DOCS_URL} target="_blank" rel="noopener">
+    <a
+      class="gallery-link"
+      href=${CONTRIBUTE_DOCS_URL}
+      target="_blank"
+      rel="noopener"
+    >
       How sharing works
     </a>
   </article>`;
@@ -171,7 +186,10 @@ function errorView() {
     ${header()}
     <div class="gallery-empty">
       <p>Could not load the gallery.</p>
-      <button class="gallery-btn gallery-btn--primary" @click=${() => showGallery()}>
+      <button
+        class="gallery-btn gallery-btn--primary"
+        @click=${() => showGallery()}
+      >
         Retry
       </button>
     </div>
