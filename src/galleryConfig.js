@@ -1,7 +1,7 @@
 // Gallery config. Contributions are pull requests against this repo; repoint
 // owner/repo/branch here to target a different one.
 export const GALLERY = {
-  owner: "Physics-Morris",
+  owner: "UNC-Project-Open-AAC",
   repo: "OS-DPI",
   branch: "main",
   // Repo path where contributed boards live (used in PR upload links).
