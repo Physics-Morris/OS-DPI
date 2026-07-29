@@ -14,9 +14,12 @@ export function galleryIndexURL() {
   return `${import.meta.env.BASE_URL}${GALLERY.publicPath}/index.json`;
 }
 
-// URL that loads a board into OS-DPI via the bundled board file.
+// URL that loads a board into OS-DPI. A gallery folder normally ships its own
+// board.osdpi. When meta.json sets `board`, that path is used instead, which
+// lets an entry reuse a board the site already serves (examples/) rather than
+// committing a second copy of the same file.
 export function loadURL(item, edit = false) {
-  const board = `${GALLERY.publicPath}/${item.slug}/board.osdpi`;
+  const board = item.board || `${GALLERY.publicPath}/${item.slug}/board.osdpi`;
   return `${import.meta.env.BASE_URL}?fetch=${board}${edit ? "&edit" : ""}#${item.slug}`;
 }
 
