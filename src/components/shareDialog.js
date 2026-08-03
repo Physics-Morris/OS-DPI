@@ -125,14 +125,22 @@ class ShareDialog {
         </p>
         <ol>
           <li>
-            On the GitHub page, drag in <code>board.osdpi</code> and
-            <code>meta.json</code>.
+            On the GitHub page, drag in <strong>both</strong> downloaded files,
+            keeping their names: <code>board.osdpi</code> and
+            <code>meta.json</code>. An entry without both is skipped.
           </li>
           <li>
-            Click <strong>Commit changes</strong> /
-            <strong>Propose changes</strong>.
+            If GitHub offers a choice, pick
+            <strong
+              >Create a new branch for this commit and start a pull
+              request</strong
+            >. It only offers this if you can write to the repo, and the other
+            option commits straight to <code>${GALLERY.branch}</code>.
           </li>
-          <li>Confirm to open your pull request.</li>
+          <li>
+            Click <strong>Propose changes</strong>, then confirm to open your
+            pull request.
+          </li>
         </ol>
         <p class="share-hint">
           If a download was blocked, copy <code>meta.json</code>:

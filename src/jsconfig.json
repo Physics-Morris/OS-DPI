@@ -20,6 +20,7 @@
     "OS-DPI",
     "public",
     "scripts",
+    "vite.config.js",
     "components/headmouse/tracky-mouse"
   ]
 }

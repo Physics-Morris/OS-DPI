@@ -67,6 +67,15 @@ body.gallery-mode .fsx-btn {
   color: var(--text2);
 }
 
+/* ---- Start a simulation ---- */
+.gallery-own {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
 /* ---- Tabs ---- */
 .gallery-tabbar {
   display: flex;
@@ -233,6 +242,11 @@ body.gallery-mode .fsx-btn {
   padding-top: 0.55rem;
 }
 
+/* Filling the row is the card's doing, not the button's. */
+.gallery-card-actions .gallery-btn--primary {
+  flex: 1;
+}
+
 /* ---- Buttons ---- */
 .gallery-btn {
   display: inline-flex;
@@ -255,7 +269,6 @@ body.gallery-mode .fsx-btn {
 }
 
 .gallery-btn--primary {
-  flex: 1;
   background-color: var(--brand);
   color: var(--text1);
 }
@@ -329,9 +342,16 @@ body.gallery-mode .fsx-btn {
   max-width: 18rem;
 }
 
+/* Used on an anchor and a button, so button chrome is reset. */
 .gallery-link {
   font-size: 0.8rem;
   color: var(--brand);
+  font-family: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .gallery-cta-main:focus-visible,
@@ -342,6 +362,11 @@ body.gallery-mode .fsx-btn {
 }
 
 /* ---- Empty / error ---- */
+.gallery-note {
+  margin: 0 0 1rem;
+  color: var(--text2);
+}
+
 .gallery-empty {
   display: flex;
   flex-direction: column;

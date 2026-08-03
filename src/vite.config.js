@@ -2,8 +2,24 @@
 import { defineConfig } from "vite";
 import path from "path";
 import fs from "fs";
+import { execSync } from "child_process";
 
 const base = "/OS-DPI/";
+
+// Repo this checkout came from, as deploy.sh reads it. The gallery uses it to
+// route contributions when the page URL cannot say.
+function originRepo() {
+  try {
+    const url = execSync("git config --get remote.origin.url", {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    const m = url.match(/github\.com[:/]([^/]+)\/(.+?)(?:\.git)?$/);
+    return m ? { owner: m[1], repo: m[2] } : null;
+  } catch {
+    return null;
+  }
+}
 
 const dt = new Date();
 const version = `"${dt.getFullYear()}-${dt.getMonth()}-${dt.getDate()}-${dt.getHours()}-${dt.getMinutes()}-${dt.getSeconds()}"`;
@@ -74,6 +90,7 @@ export default defineConfig({
   },
   define: {
     APP_VERSION: version,
+    ORIGIN_REPO: JSON.stringify(originRepo()),
   },
   plugins: [fullReloadAlways, serveExamples],
 });

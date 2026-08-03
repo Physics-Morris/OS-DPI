@@ -1,6 +1,9 @@
 import { html, render } from "uhtml";
 import "css/gallery.css";
-import db from "app/db";
+import "css/share.css";
+import { fileOpen } from "browser-fs-access";
+import db, { DB } from "app/db";
+import pleaseWait from "components/wait";
 import { galleryIndexURL, loadURL, GALLERY } from "app/galleryConfig";
 
 // Example gallery landing view. Lists boards from the manifest and loads one
@@ -13,11 +16,33 @@ let allItems = [];
 let activeTab = "official";
 let activeTag = null;
 
+function openDesign(name) {
+  window.open(`${import.meta.env.BASE_URL}#${name}`, "_blank", "noopener=true");
+}
+
 // Start a fresh design in a new tab, like File > New.
 async function newDesign(event) {
   event.preventDefault();
-  const name = await db.uniqueName("new");
-  window.open(`${import.meta.env.BASE_URL}#${name}`, "_blank", "noopener=true");
+  openDesign(await db.uniqueName("new"));
+}
+
+// Load a design from a file on disk, like File > Import File.
+async function importDesign(event) {
+  event.preventDefault();
+  const local = new DB();
+  try {
+    const file = await fileOpen({
+      mimeTypes: ["application/octet-stream"],
+      extensions: [".osdpi", ".zip"],
+      description: "OS-DPI designs",
+      id: "os-dpi",
+    });
+    await pleaseWait(local.readDesignFromFile(file));
+    openDesign(local.designName);
+  } catch (e) {
+    // The picker throws on cancel.
+    console.log(e);
+  }
 }
 
 async function fetchIndex() {
@@ -89,27 +114,78 @@ function card(item) {
 
 function contributeCard() {
   return html`<article class="gallery-card gallery-card--cta">
-    <a
-      class="gallery-cta-main"
-      href=${import.meta.env.BASE_URL}
-      @click=${newDesign}
-    >
-      <span class="gallery-cta-icon" aria-hidden="true">+</span>
-      <span class="gallery-cta-title">Build &amp; share your own</span>
-      <span class="gallery-cta-sub"
-        >Create a board, then File &rarr; Share to Gallery to open a pull
-        request</span
-      >
-    </a>
-    <a
-      class="gallery-link"
-      href=${CONTRIBUTE_DOCS_URL}
-      target="_blank"
-      rel="noopener"
-    >
+    <span class="gallery-cta-title">Sharing is optional</span>
+    <span class="gallery-cta-sub">
+      If you build a simulation you think others would find useful, File &rarr;
+      Share to Gallery will offer it here. Nothing you make is shared unless you
+      choose to.
+    </span>
+    <button class="gallery-link" @click=${openHowSharingWorks}>
       How sharing works
-    </a>
+    </button>
   </article>`;
+}
+
+const HOW_DIALOG_ID = "GalleryHowDialog";
+
+function openHowSharingWorks() {
+  const dialog = /** @type {HTMLDialogElement} */ (
+    document.getElementById(HOW_DIALOG_ID)
+  );
+  if (!dialog) return;
+  render(
+    dialog,
+    html`<div class="share-form share-instructions">
+      <h1>How sharing works</h1>
+      <p class="share-hint">
+        The gallery is a folder in the project's GitHub repository, so adding a
+        simulation means proposing a change to it. There is no server behind
+        this, and nothing is uploaded in the background.
+      </p>
+      <ol>
+        <li>
+          <strong>You choose to share.</strong> In a simulation, use File &rarr;
+          Share to Gallery and describe it. Your work stays in your browser
+          until you do this.
+        </li>
+        <li>
+          <strong>Two files are prepared.</strong> Your simulation as
+          <code>board.osdpi</code>, and a <code>meta.json</code> holding the
+          title, description, tags, and your name. Both are needed, and both
+          keep those names.
+        </li>
+        <li>
+          <strong>GitHub opens.</strong> Drop the two files in and propose the
+          change. This creates a pull request, which is a request to add your
+          folder, not a change to the site yet. A free GitHub account is
+          required.
+        </li>
+        <li>
+          <strong>Someone reviews it.</strong> A maintainer looks at the
+          simulation and merges it. Your entry then appears under Community,
+          with your name, the next time the site is built.
+        </li>
+      </ol>
+      <div class="share-actions">
+        <a
+          class="share-btn"
+          href=${CONTRIBUTE_DOCS_URL}
+          target="_blank"
+          rel="noopener"
+        >
+          Browse the gallery folder
+        </a>
+        <button
+          type="button"
+          class="share-btn share-btn--primary"
+          @click=${() => dialog.close()}
+        >
+          Close
+        </button>
+      </div>
+    </div>`,
+  );
+  dialog.showModal();
 }
 
 function header() {
@@ -118,10 +194,20 @@ function header() {
     <div class="gallery-header-text">
       <h1 class="gallery-title">Example gallery</h1>
       <p class="gallery-subtitle">
-        Browse boards and load one into OS-DPI with a click.
+        Browse AAC simulations and open one in OS-DPI with a click.
       </p>
     </div>
   </header>`;
+}
+
+// Kept out of the tabs, which only choose whose examples you are browsing.
+function ownWork() {
+  return html`<div class="gallery-own">
+    <button class="gallery-btn gallery-btn--primary" @click=${newDesign}>
+      New simulation
+    </button>
+    <button class="gallery-btn" @click=${importDesign}>Import a file</button>
+  </div>`;
 }
 
 function tab(id, label, count) {
@@ -167,7 +253,7 @@ function view() {
     ? tabItems.filter((it) => (it.tags || []).includes(activeTag))
     : tabItems;
   return html`<div class="gallery">
-    ${header()}
+    ${header()} ${ownWork()}
     <div class="gallery-tabbar">
       <div class="gallery-tabs" role="tablist">
         ${tab("official", "OS-DPI", official.length)}
@@ -175,9 +261,17 @@ function view() {
       </div>
     </div>
     ${tagBar(tabItems)}
+    ${
+      isCommunity && !community.length
+        ? html`<p class="gallery-note">
+            Nothing shared here yet, so this tab is empty for now.
+          </p>`
+        : null
+    }
     <div class="gallery-grid">
       ${list.map(card)} ${isCommunity ? contributeCard() : null}
     </div>
+    <dialog id=${HOW_DIALOG_ID} class="share-dialog"></dialog>
   </div>`;
 }
 
