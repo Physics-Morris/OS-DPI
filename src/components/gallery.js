@@ -5,6 +5,7 @@ import { fileOpen } from "browser-fs-access";
 import db, { DB } from "app/db";
 import pleaseWait from "components/wait";
 import { galleryIndexURL, loadURL, GALLERY } from "app/galleryConfig";
+import { claimTab, showInTab, openTab } from "app/openTab";
 
 // Example gallery landing view. Lists boards from the manifest and loads one
 // via the existing `?fetch=` path. Rendered directly with uhtml.
@@ -20,31 +21,17 @@ function designURL(name) {
   return `${import.meta.env.BASE_URL}#${name}`;
 }
 
-/* Safari only runs window.open synchronously inside the gesture that triggered
- * it, so anything opened after an await is blocked. Note we can't pass
- * noopener, which would make window.open return null even when it worked and
- * leave us unable to tell. Both paths below fall back to this tab. */
-
-// Send a tab we already claimed to the design.
-function showDesign(tab, name) {
-  const url = designURL(name);
-  if (tab && !tab.closed) tab.location.replace(url);
-  else window.location.assign(url);
-}
-
-// Open the design in a new tab now, for when there is nothing left to await.
 function openDesign(name) {
-  const url = designURL(name);
-  if (!window.open(url, "_blank")) window.location.assign(url);
+  openTab(designURL(name));
 }
 
 // Start a fresh design in a new tab, like File > New.
 async function newDesign(event) {
   event.preventDefault();
   // Claim the tab on the click, before awaiting the name.
-  const tab = window.open("", "_blank");
+  const tab = claimTab();
   try {
-    showDesign(tab, await db.uniqueName("new"));
+    showInTab(tab, designURL(await db.uniqueName("new")));
   } catch (e) {
     if (tab && !tab.closed) tab.close();
     throw e;

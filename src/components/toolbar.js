@@ -17,6 +17,7 @@ import { Designer } from "./designer";
 import { readSheetFromBlob, saveContent } from "app/spreadsheet";
 import { SaveLog, ClearLog } from "./logger";
 import { friendlyName, wikiName } from "./names";
+import { claimTab, showInTab, openTab } from "app/openTab";
 
 import { workerUpdateButton } from "components/serviceWorker";
 import { monkey } from "components/monkeyTest";
@@ -194,7 +195,7 @@ function getFileMenuItems(bar) {
         })
           .then((file) => pleaseWait(local_db.readDesignFromFile(file)))
           .then(() => {
-            window.open(`#${local_db.designName}`, "_blank", `noopener=true`);
+            openTab(`#${local_db.designName}`);
           })
           .catch((e) => console.log(e));
       },
@@ -217,8 +218,9 @@ function getFileMenuItems(bar) {
     new MenuItem({
       label: "New",
       callback: async () => {
-        const name = await db.uniqueName("new");
-        window.open(`#${name}`, "_blank", `noopener=true`);
+        // Claim the tab on the click, before awaiting the name.
+        const tab = claimTab();
+        showInTab(tab, `#${await db.uniqueName("new")}`);
       },
     }),
     new MenuItem({
@@ -231,7 +233,7 @@ function getFileMenuItems(bar) {
       label: "Gallery",
       title: "Browse the example gallery",
       callback: () => {
-        window.open("#gallery", "_blank", `noopener=true`);
+        openTab("#gallery");
       },
     }),
     new MenuItem({
@@ -679,11 +681,7 @@ class ImportURLDialog {
             const local_db = new DB();
             pleaseWait(local_db.readDesignFromURL(input.value)).then(
               () => {
-                window.open(
-                  `#${local_db.designName}`,
-                  "_blank",
-                  `noopener=true`,
-                );
+                openTab(`#${local_db.designName}`);
               },
               () => console.log("rejected"),
             );
