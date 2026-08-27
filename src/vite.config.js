@@ -74,7 +74,9 @@ export default defineConfig({
   build: {
     sourcemap: true,
     minify: false,
-    target: "esnext",
+    // oldest engine the CSS supports (:has(), dvh, dialog); esnext shipped
+    // syntax that older iPad Safari couldn't parse
+    target: "safari15.4",
     assetsInlineLimit: 0,
     rollupOptions: {
       input: {

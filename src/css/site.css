@@ -15,10 +15,14 @@ button {
   font-size: inherit;
 }
 
-body.loaded,
-body:has(#ErrorReport) {
+body.loaded {
   opacity: 1;
   /* transition: opacity 0.5s ease-in; */
+}
+
+/* own rule so an unsupported :has() can't invalidate body.loaded above */
+body:has(#ErrorReport) {
+  opacity: 1;
 }
 
 div#UI {

@@ -164,8 +164,15 @@ export async function start() {
   renderUI();
 }
 
-/* Watch for updates happening in other tabs */
-const channel = new BroadcastChannel("os-dpi");
+/* Watch for updates happening in other tabs.
+ * BroadcastChannel needs Safari 15.4, so stub it out on older browsers. */
+const channel = /** @type {BroadcastChannel} */ (
+  /** @type {any} */ (
+    typeof BroadcastChannel !== "undefined"
+      ? new BroadcastChannel("os-dpi")
+      : { onmessage: null, postMessage() {}, close() {} }
+  )
+);
 /** @param {MessageEvent} event */
 channel.onmessage = (event) => {
   const message = /** @type {UpdateNotification} */ (event.data);
